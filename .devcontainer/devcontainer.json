@@ -1,30 +1,21 @@
 {
   "name": "star-container",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  "build": { "dockerfile": "Dockerfile" },
+
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": true,
       "installDockerBuildx": true
     }
   },
-  "remoteEnv": {
+
+  "containerEnv": {
+    "DOCKER_API_VERSION": "1.43",
     "HOST_PROJECT_PATH": "${localWorkspaceFolder}"
   },
+
   "postCreateCommand": "docker pull ghcr.io/star-bnl/star-sw:main-root5-gcc485",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "akamud.vscode-theme-onedark",
-        "ms-vscode.cpptools",
-        "albertopdrf.root-file-viewer"
-      ]
-    }
-  },
+
   "remoteUser": "vscode",
-  "mounts": [
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-  ],
   "workspaceFolder": "/workspaces/star-tutorial"
 }
