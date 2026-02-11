@@ -59,11 +59,10 @@ STAR uses fixed toolchains for binary compatibility across libraries.
 Run from project root:
 
 ```bash
-star-shell
-cons
-ls -d .sl*_gcc*/LIB
+star-shell #load into star container
+cons 
 root -l -b -q 'macros/runPicoDstAnalysisMaker.C("/workspaces/star-tutorial/st_physics_20069002_raw_1500008.picoDst.root","outputPicoAnaMaker.root",-1)'
-root -l -b -q 'macros/makeQaPdf.C("outputPicoAnaMaker.root","qa_report.pdf")'
+root -l -b -q macros/readMyTreeEvent.C++
 ```
 
 ## Remark: Running on your own laptop
@@ -98,9 +97,7 @@ grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc || echo 'export PATH=
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-
-## Some old presentation on DST tutorials:
-
+## Some presentation on DST tutorials:
 - [Introduction to PicoDst](https://drupal.star.bnl.gov/STAR/system/files/Nigmatkulov_intro2pico_Krakow2019.pdf) (Grigory Nigmatkulov, 2019)
 - [Starting Data Analysis on STAR](http://nuclear.ucdavis.edu/~brovko/GettingStarted.pdf) (Samantha Brovko, 2011)
 - [A common-MuDst tutorial](https://www.star.bnl.gov/public/comp/meet/RM200311/MuDstTutorial.pdf) (Sergey Panitkin, 2003)
