@@ -15,7 +15,15 @@
   },
 
   "postCreateCommand": "docker pull ghcr.io/star-bnl/star-sw:main-root5-gcc485",
-
+"customizations": {
+    "vscode": {
+      "extensions": [
+        "akamud.vscode-theme-onedark",
+        "ms-vscode.cpptools",
+        "albertopdrf.root-file-viewer"
+      ]
+    }
+  },
   "remoteUser": "vscode",
   "workspaceFolder": "/workspaces/star-tutorial"
 }
