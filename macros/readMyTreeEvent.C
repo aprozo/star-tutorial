@@ -3,26 +3,20 @@
 #include <TTree.h>
 #include <iostream>
 
-class MyTreeEvent;
-class MyTrack;
-
 // one may need to copy header files on personal laptop - instructions how to read your TTree
-#include "../StRoot/StPicoDstAnalysisMaker/MyTreeEvent.h" 
+#include "../StRoot/StPicoDstAnalysisMaker/MyTreeEvent.h"
 #include "../StRoot/StPicoDstAnalysisMaker/MyTrack.h"
 
-//==============================================================================
-// Class implementations for ROOT dictionary
-//==============================================================================
-#ifdef __MAKECINT__
-#pragma link C++ class MyTrack + ;
-#pragma link C++ class MyTreeEvent + ;
-#pragma link C++ class std::vector < MyTrack> + ;
+#ifdef __CINT__
+#pragma link C++ class MyTrack+;
+#pragma link C++ class MyTreeEvent+;
+#pragma link C++ class std::vector<MyTrack>+;
 #endif
-// ClassImp implementations
-ClassImp(MyTrack);
-ClassImp(MyTreeEvent);
 
-void readMyTreeEvent(TString filename = "/workspaces/star-tutorial/outputPicoAnaMaker.root")
+ClassImp(MyTrack)
+ClassImp(MyTreeEvent)
+
+void readMyTreeEvent(TString filename = "./output_tree.root")
 {
 
   TFile *file = TFile::Open(filename, "READ");
@@ -45,15 +39,15 @@ void readMyTreeEvent(TString filename = "/workspaces/star-tutorial/outputPicoAna
     // Access the track vectors
     std::cout << "Inclusive tracks: " << event->inclusiveTracks.size()
               << std::endl;
-    if (event->inclusiveTracks.size()<5) continue;
+    if (event->inclusiveTracks.size() < 5)
+      continue;
 
-    for (size_t i = 0; i < 5; i++) //print first tracks
+    for (size_t iTrack = 0; iTrack < 5; iTrack++) // print first tracks
     {
-      std::cout << "Track ID: " << event->inclusiveTracks[i].id
-                << ", pt: " << event->inclusiveTracks[i].pt << " GeV/c"
-                << ", eta: " << event->inclusiveTracks[i].eta
-                << ", phi: " << event->inclusiveTracks[i].phi
-                << ", charge: " << event->inclusiveTracks[i].charge
+      std::cout << "Track pt: " << event->inclusiveTracks[iTrack].pt << " GeV/c"
+                << ", eta: " << event->inclusiveTracks[iTrack].eta
+                << ", phi: " << event->inclusiveTracks[iTrack].phi
+                << ", charge: " << event->inclusiveTracks[iTrack].charge
                 << std::endl;
     }
 

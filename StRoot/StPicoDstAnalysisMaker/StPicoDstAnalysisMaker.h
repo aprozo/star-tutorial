@@ -6,7 +6,6 @@
 
 // C++ headers
 #include <vector>
-#include <iostream>
 
 // My headers
 #include "MyTreeEvent.h"
@@ -24,21 +23,20 @@ class TFile;
 class TH1F;
 class TH1D;
 class TH2F;
+class TTree;
 
 //________________
 class StPicoDstAnalysisMaker : public StMaker {
 
  public:
   StPicoDstAnalysisMaker(StPicoDstMaker *maker,
-                         TString oFileName = "oStPicoDstAnalysisMaker.root" ); // Constructor
+                         TString outFileName = "oStPicoDstAnalysisMaker.root" ); // Constructor
   virtual ~StPicoDstAnalysisMaker();  // Destructor
   // inherited methods from StMaker
   virtual Int_t Init();
   virtual Int_t Make();
   virtual Int_t Finish();
   //
-  inline void setDebugStatus(bool status)                      { mDebug = status; }
-
   inline void setVtxZ(const float& lo, const float& hi)        { mVtxZ[0]=lo; mVtxZ[1]=hi; } // cut on z-position of the primary vertex
   inline void setVtxR(const float& lo, const float& hi)        { mVtxR[0]=lo; mVtxR[1]=hi; }
   inline void setNHits(const int& lo, const int& hi)           { mNHits[0] = lo; mNHits[1] = hi; } //cut on nHits
@@ -56,8 +54,6 @@ class StPicoDstAnalysisMaker : public StMaker {
 
   StPicoDstMaker *mPicoDstMaker;
   StPicoDst *mPicoDst;
-
-  Bool_t mDebug;  // Debug mode
 
   std::vector<unsigned int> mTriggerId;   // List of triggers to select
 

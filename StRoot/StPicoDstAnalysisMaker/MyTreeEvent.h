@@ -1,6 +1,7 @@
-#ifndef  MyTreeEvent_h
-#define  MyTreeEvent_h
+#ifndef MYTREEEVENT_H
+#define MYTREEEVENT_H
 
+#include "TObject.h"
 #include "MyTrack.h"
 #include <vector>
 
@@ -16,6 +17,4 @@ public:
   ClassDef(MyTreeEvent, 1);
 };
 
-
-#endif // 
-
+#endif // MYTREEEVENT_H

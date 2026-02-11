@@ -1,67 +1,40 @@
 // C++ headers
 #include <iostream>
-//
-// Forward declarations
-//
-class StMaker;
-class StChain;
-class StPicoDstMaker;
+
 //_________________
-void runPicoDstAnalysisMaker(const char *inFileName = "/workspaces/star-tutorial/st_physics_20069002_raw_1500008.picoDst.root") {
-  std::cout << "Lets run the StPicoDstAnalysisMaker" << std::endl;
+void runPicoDstAnalysisMaker(TString inFileName = "/workspaces/star-tutorial/st_physics_20069002_raw_1500008.picoDst.root", 
+                            TString outFileName = "output_tree.root",
+                            const int maxEvents = 10) {
+
   // Load all the STAR libraries
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
-  // Load specific libraries
   gSystem->Load("StPicoEvent");
   gSystem->Load("StPicoDstMaker");
   gSystem->AddDynamicPath(gSystem->ExpandPathName("$PWD/.sl79_gcc485/LIB"));
   gSystem->Load("StPicoDstAnalysisMaker");
 
   StChain *chain = new StChain();
-
-  std::cout << "Creating StPicoDstMaker to read and pass file list"<< std::endl;
-  // Read via StPicoDstMaker
-  // I/O mode: write=1, read=2; input file (or list of files); name
   StPicoDstMaker *picoMaker = new StPicoDstMaker(2, inFileName, "picoDst");
-  std::cout << "... done" << std::endl;
-
-  std::cout << "Constructing StPicoDstAnalysisMaker with StPicoDstMaker" << std::endl;  
-  StPicoDstAnalysisMaker *anaMaker = new StPicoDstAnalysisMaker(picoMaker, "outputPicoAnaMaker.root"); // Create an instance of the StPicoDstAnalysisMaker and initialize it with StPicoDstMaker
-  // Add vertex cut or some other cuts
+  StPicoDstAnalysisMaker *anaMaker = new StPicoDstAnalysisMaker(picoMaker, outFileName);
   anaMaker->setVtxZ(-40., 40.);
-  std::cout << "... done" << std::endl;
 
-  std::cout << "Initializing chain" << std::endl;
   if (chain->Init() == kStErr) {
-    std::cout << "Error during the chain initializtion. Exit. " << std::endl;
+    std::cout << "[ERROR] Chain initialization failed." << std::endl;
     return;
   }
-  std::cout << "... done" << std::endl;
-  int nEvents = picoMaker->chain()->GetEntries();
-  std::cout << " Number of events in files: " << nEvents << std::endl;
-  // Also one can set a very large number to process, whyle the special return
-  // flag will send when there will be EndOfFile (EOF)
-  for (Int_t iEvent = 0; iEvent < nEvents; iEvent++) {
-    if (iEvent % 1000 == 0)
-      std::cout << "Macro: working on event: " << iEvent << std::endl;
+
+  const Int_t totalEntries = picoMaker->chain()->GetEntries();
+  const Int_t nEvents = (maxEvents > 0 && maxEvents < totalEntries) ? maxEvents : totalEntries; 
+
+  for (Int_t iEvent = 0; iEvent < nEvents; ++iEvent) {
     chain->Clear();
-
-    int iret = chain->Make();     // Execute the chain and check return code
-
-    if (iret) {   // Quit event processing if return code is not 0
-      std::cout << "Bad return code! " << iret << std::endl;
+    const Int_t status = chain->Make();
+    if (status) {
+      std::cout << "[WARN] Stopped early at event " << iEvent << " (status " << status << ")" << std::endl;
       break;
     }
-  } // event loop
-
-  std::cout << "Finalizing chain" << std::endl;
-  chain->Finish();  // Finalize all makers in chain
-  std::cout << "... done" << std::endl;
-
-  // Delete all dynamically allocated objects to free memory
-  delete anaMaker;
-  delete picoMaker;
-  delete chain;
+  }
+  chain->Finish();
 }

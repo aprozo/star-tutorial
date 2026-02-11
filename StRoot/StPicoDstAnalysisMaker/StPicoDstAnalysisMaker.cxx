@@ -19,20 +19,15 @@
 #include "TH1F.h"
 #include "TH1D.h"
 #include "TH2F.h"
+#include "TDirectory.h"
 #include "TTree.h"
-
-#include "MyTrack.h"
-#include "MyTreeEvent.h"
-
-// C++ headers
-#include <limits>
 
 ClassImp(StPicoDstAnalysisMaker)
 
 //________________
 StPicoDstAnalysisMaker::StPicoDstAnalysisMaker(StPicoDstMaker *maker,
-                                               TString oFileName) :
-  StMaker(), mDebug(false), mOutFileName(oFileName), mOutFile(nullptr), //this is initialization list
+                                               TString outFileName) :
+  mOutFileName(outFileName), mOutFile(nullptr), //this is initialization list
   mPicoDstMaker(maker), mPicoDst(nullptr){                              //at the time of object creation
 
   // Clean trigger ID collection
@@ -56,9 +51,6 @@ StPicoDstAnalysisMaker::~StPicoDstAnalysisMaker() {
 //________________
 Int_t StPicoDstAnalysisMaker::Init() {
   // Initialization of the Maker
-  if (mDebug) {
-    LOG_INFO << "Initializing StPicoDstAnalysisMaker..." << endl;
-  }
   if (mPicoDstMaker) {
 
     mPicoDst = mPicoDstMaker->picoDst();    // Retrieve pointer to the StPicoDst structure
@@ -87,18 +79,11 @@ Int_t StPicoDstAnalysisMaker::Init() {
 
   CreateHistograms();
 
-  if (mDebug) {
-    LOG_INFO << "StPicoDstAnalysisMaker has been initialized\n" << endl;
-  }
   return kStOk;
 }
 
 //________________
 Int_t StPicoDstAnalysisMaker::Finish() {   // Finalization of the Maker
-  if (mDebug) {
-    LOG_INFO << "Finishing StPicoDstAnalysisMaker..." << endl;
-  }
-
   if (mOutFile) {   // Write histograms to the file and then close it
     LOG_INFO << "Writing file: " << mOutFileName;
     mOutFile->Write(); 
@@ -108,20 +93,14 @@ Int_t StPicoDstAnalysisMaker::Finish() {   // Finalization of the Maker
   else {
     LOG_WARN << "[WARNING] Output file does not exist. Nowhere to write!" << endl;
   }
-
-  if (mDebug) {
-    LOG_INFO << "StPicoDstAnalysisMaker has been finalized\n" << endl;
-  }
   return kStOk;
 }
 
 //________________
 void StPicoDstAnalysisMaker::CreateHistograms() {
-  if (mDebug) {
-    LOG_INFO << "Creating histograms..." << endl;
-  }
-  TDirectory *dir = gDirectory;
-  dir->mkdir("qa_histograms")->cd(); // create a directory where one can put all histograms
+  TDirectory *baseDir = gDirectory;
+  TDirectory *qaDir = baseDir->mkdir("qa_histograms");
+  qaDir->cd();
    //--------------------------------------------------------------------------  
   hVtxXvsY = new TH2F("hVtxXvsY","Primary vertex y vs. x;x (cm);y (cm)", 200, -10., 10., 200, -10., 10.);
   hVtxZ = new TH1F("hVtxZ","Primary vertex z; z (cm); Entries", 240, -120., 120.);
@@ -143,9 +122,6 @@ void StPicoDstAnalysisMaker::CreateHistograms() {
                                 420, -2.1, 2.1, 200, 0.8, 2.8);
   //--------------------------------------------------------------------------  
   hBemcTowerAdc = new TH1D("hBemcTowerAdc","BEMC tower ADC; ADC; Entries", 500, 0., 3000.);
-  if (mDebug) {
-    LOG_INFO << "Histograms have been created" << endl;
-  }
 }
 
 //________________
@@ -183,7 +159,6 @@ Bool_t StPicoDstAnalysisMaker::TrackCut(StPicoTrack *track) {
 //________________
 Int_t StPicoDstAnalysisMaker::Make() {
   // Make() is executed on every new event
-  // The example that shows how to access event information
 
   StPicoEvent *currentEvent = mPicoDst->event();
   if ( !EventCut(currentEvent) )
@@ -213,7 +188,6 @@ Int_t StPicoDstAnalysisMaker::Make() {
 
     MyTrack myTrack; // create a temporary MyTrack object to store track information
     //=============================================================
-    myTrack.id = track->id();
     myTrack.pt = track->gPt();
     myTrack.eta = track->gMom().Eta();
     myTrack.phi = track->gMom().Phi();
