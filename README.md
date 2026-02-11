@@ -1,4 +1,7 @@
-# STAR StRoot Tutorial [![Github Codespace](https://img.shields.io/badge/open-GH_Codespaces-blue?logo=github)](https://codespaces.new/aprozo/star-tutorial?quickstart=1)
+# STAR Environment Tutorial [![Github Codespace](https://img.shields.io/badge/open-GH_Codespaces-blue?logo=github)](https://codespaces.new/aprozo/star-tutorial?quickstart=1)
+
+
+
 For successfull running on Github Codespaces one can submit an application for Free [Github Education](https://github.com/education) benefits.
 
 This is an example analysis of [`StPicoDst`](https://www.star.bnl.gov/webdata/dox/html/classStPicoDstMaker.html):
@@ -9,53 +12,59 @@ This is an example analysis of [`StPicoDst`](https://www.star.bnl.gov/webdata/do
 
 It is based on [Grigory's presentation on PicoDst 2019](https://drupal.star.bnl.gov/STAR/system/files/Nigmatkulov_intro2pico_Krakow2019.pdf)
 
-## Introduction
 
-The [starver](https://github.com/star-bnl/star-sw) corresponds to the latest version `star pro` with compiler `gcc4.85` and `ROOT 5.34` version.
+## Learning Goals
+1. Understand what `StRoot` is and why STAR code is placed there.
+2. Understand what  [`cons` command](https://www.gnu.org/software/cons/stable/cons.html) does and what `.sl7X_gccXX` means.
+3. Build and run one STAR maker.
+4. Produce one user tree (`MyTreeEvent` + `MyTrack`) and read it.
 
-STAR uses [`cons` command](https://www.gnu.org/software/cons/stable/cons.html) to compile. This is similar to compiling projects using `Make` file or performing `g++` command with additional libs within complex `C++` projects (whic STAR is).
-The `cons` command will:
-- create a directory `.sl7X_gccXX` where all compiled libraries will go which are used in your project
-- perform compilation of all your files with `.cxx`(important!) and connected headers `.h` under `StRoot` directory.
+## Essential Project Layout
+```text
+StRoot/StPicoDstAnalysisMaker/      # user STAR package compiled by cons
+MyTreeEvent.h / MyTrack.h           # custom classes stored in output TTree
+macros/runPicoDstAnalysisMaker.C    # run maker
+macros/readMyTreeEvent.C            # read TTree with custom classes (no STAR)
 
-## What this tutorial about?
-- It will show how `StRoot` folder is used to compile your project.
-- The [analysis macro](/macros/runPicoDstAnalysisMaker.C) will create a file with user `TTree` and `QA Histograms`
-- The user defined `TTree` actually consists of classes [MyTreeEvent.h](/StRoot/StPicoDstAnalysisMaker/MyTreeEvent.h) and [MyTrack.h](/StRoot/StPicoDstAnalysisMaker/MyTrack.h)
-- There is a second [standalone macro](/macros/readMyTreeEvent.C) which does not need any STAR infrastructure - only meantioned header files [MyTreeEvent.h](/StRoot/StPicoDstAnalysisMaker/MyTreeEvent.h) and [MyTrack.h](/StRoot/StPicoDstAnalysisMaker/MyTrack.h) and can be further used for analysis on personal latptop or batchfarm.
- 
-## Run instructions:
-1. First, you'll need to enter the STAR container, for that, type:
+```
+## Core Concepts
+### What is `StRoot`?
+`StRoot` is the STAR source tree location where analysis packages are expected.
+
+### Why do we need `StRoot` in this project?
+`cons` discovers and builds STAR packages from `StRoot/<PackageName>`.  
+If code is outside this structure, your package library is usually not built in the standard STAR way.
+
+### What is `cons`?
+`cons` is STAR's build command (similar role to `make`): it compiles C++ code and creates shared libraries used by ROOT macros.
+
+### What happens during `cons`?
+1. STAR platform/compiler setup is read.
+2. Build directory `.sl7X_gccXX` is created or updated.
+3. Code under `StRoot/` is compiled.
+4. Shared libraries are written to `.sl7X_gccXX/LIB`.
+
+### What is `.sl7X_gccXX`?
+A STAR build-output directory name:
+- `sl7X`: Scientific Linux 7 compatible build target.
+- `gccXX`: compiler tag.
+
+Example: `.sl79_gcc485` means SL7.9 target with GCC 4.8.5 toolchain.
+
+### What is `gcc485` (`gcc4.8.5`)?
+`gcc485` is shorthand for GNU C++ compiler version `4.8.5`.  
+STAR uses fixed toolchains for binary compatibility across libraries.
+
+## Minimal Workflow
+Run from project root:
+
 ```bash
 star-shell
-```
-2. To compile a project, perform `cons` command
-```bash
 cons
+ls -d .sl*_gcc*/LIB
+root -l -b -q 'macros/runPicoDstAnalysisMaker.C("/workspaces/star-tutorial/st_physics_20069002_raw_1500008.picoDst.root","outputPicoAnaMaker.root",-1)'
+root -l -b -q 'macros/makeQaPdf.C("outputPicoAnaMaker.root","qa_report.pdf")'
 ```
-3. Now, one can run event analysis macro using without(!) compilation (not using `+` sign at the end)
-```bash
-root -l -b -q macros/runPicoDstAnalysisMaker.C
-```
-It will create a `.root` file with your TTree and some QA histograms. 
-If you are interested what are these [ROOT flags](https://root.cern.ch/root/html534/guides/users-guide/ROOTUsersGuide.html#start-and-quit-a-root-session): 
-- `-l` - no splash screen
-- `-b` - stands for batchmode (no pictures showed),
-- `-q` - quit after executing.
-
-4. Now, one can perform your analysis on this newly created TTree with compiled (!) macro - notice `+` at the end
-```bash
-root -l -b -q macros/readMyTreeEvent.C+
-```
-
-
-## Some old presentation on DST tutorials:
-
-- [Introduction to PicoDst](https://drupal.star.bnl.gov/STAR/system/files/Nigmatkulov_intro2pico_Krakow2019.pdf) (Grigory Nigmatkulov, 2019)
-- [Starting Data Analysis on STAR](http://nuclear.ucdavis.edu/~brovko/GettingStarted.pdf) (Samantha Brovko, 2011)
-- [A common-MuDst tutorial](https://www.star.bnl.gov/public/comp/meet/RM200311/MuDstTutorial.pdf) (Sergey Panitkin, 2003)
-
-
 
 ## Remark: Running on your own laptop
 In case you want to enter and run STAR container on your own laptop:
@@ -88,4 +97,13 @@ chmod +x ~/.local/bin/star-shell
 grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >>~/.bashrc
 export PATH="$HOME/.local/bin:$PATH"
 ```
+
+
+## Some old presentation on DST tutorials:
+
+- [Introduction to PicoDst](https://drupal.star.bnl.gov/STAR/system/files/Nigmatkulov_intro2pico_Krakow2019.pdf) (Grigory Nigmatkulov, 2019)
+- [Starting Data Analysis on STAR](http://nuclear.ucdavis.edu/~brovko/GettingStarted.pdf) (Samantha Brovko, 2011)
+- [A common-MuDst tutorial](https://www.star.bnl.gov/public/comp/meet/RM200311/MuDstTutorial.pdf) (Sergey Panitkin, 2003)
+
+
 
