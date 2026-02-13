@@ -7,6 +7,20 @@ temp_gccflags.c
 AutoDict*.cxx
 AutoDict*.h
 
+submit/*/
+.vscode/
+.al9*
+
+Local*/
+*.zip
+sched*
+*.dataset
+*.session.xml
+*.log
+*.err
+*.out
+
+
 # Prerequisites
 *.d
 
