@@ -95,7 +95,58 @@ EOF
 chmod +x ~/.local/bin/star-shell
 grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >>~/.bashrc
 export PATH="$HOME/.local/bin:$PATH"
+
 ```
+
+### MacOS
+
+Install **Docker Desktop** 
+```bash
+brew install --cask docker-desktop
+```
+Then start Docker Desktop once (so the Docker daemon is running), and enter the STAR container with your **current folder** available inside the container:
+
+```bash
+docker run --rm -it \
+  --platform linux/amd64 \
+  -v "$PWD":/work -w /work \
+  ghcr.io/star-bnl/star-sw:main-root5-gcc485 \
+  bash -l
+```
+
+
+This is the Docker equivalent of your Linux `star-shell`. It mounts the current directory into `/work` and drops you into `bash -l` unless you pass your own command.
+
+```bash
+mkdir -p ~/.local/bin && cat >~/.local/bin/star-shell <<'EOF'
+#!/usr/bin/env bash
+IMAGE="ghcr.io/star-bnl/star-sw:main-root5-gcc485"
+
+# If no args provided -> interactive login shell
+if [ $# -eq 0 ]; then
+  set -- bash -l
+fi
+
+docker run -it --rm \
+  --platform linux/amd64 \
+  -v "$PWD":/work -w /work \
+  "$IMAGE" "$@"
+EOF
+
+chmod +x ~/.local/bin/star-shell
+
+# Add ~/.local/bin to PATH for zsh (default on macOS)
+grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Now you can do:
+
+```bash
+star-shell
+```
+
+
 
 ## Some presentation on DST tutorials:
 - [Introduction to PicoDst](https://drupal.star.bnl.gov/STAR/system/files/Nigmatkulov_intro2pico_Krakow2019.pdf) (Grigory Nigmatkulov, 2019)
