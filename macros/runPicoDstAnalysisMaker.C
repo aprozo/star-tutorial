@@ -2,9 +2,9 @@
 #include <iostream>
 
 //_________________
-void runPicoDstAnalysisMaker(TString inFileName = "/workspaces/star-tutorial/st_physics_20069002_raw_1500008.picoDst.root", 
+void runPicoDstAnalysisMaker(TString inFileName = "./st_physics_20069002_raw_1500008.picoDst.root", 
                             TString outFileName = "output_tree.root",
-                            const int maxEvents = 10) {
+                            const int maxEvents = -1) {
 
   // Load all the STAR libraries
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -12,6 +12,7 @@ void runPicoDstAnalysisMaker(TString inFileName = "/workspaces/star-tutorial/st_
 
   gSystem->Load("StPicoEvent");
   gSystem->Load("StPicoDstMaker");
+  gSystem->AddDynamicPath(gSystem->ExpandPathName("$PWD/.sl73_gcc485/lib"));
   gSystem->AddDynamicPath(gSystem->ExpandPathName("$PWD/.sl79_gcc485/LIB"));
   gSystem->Load("StPicoDstAnalysisMaker");
 
