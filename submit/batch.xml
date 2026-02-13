@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  STAR Scheduler / SUMS job description (XML)
+
+  Imagine this file as a RECIPE for a computing farm:
+    1) Where are the ingredients?  (input data files)
+    2) What should each worker do? (your ROOT command)
+    3) Where to write notes?       (stdout/stderr logs)
+    4) What results to bring back? (output files)
+    5) What tools to pack?         (SandBox)
+-->
+
+<!DOCTYPE note [
+  <!-- These are like "variables" for paths, so you edit them once up here -->
+  <!ENTITY baseFolder "/gpfs01/star/pwg/prozorov/star-tutorial">
+  <!ENTITY jobFolder  "&baseFolder;/submit">
+]>
+
+  <!--
+    xrootd syntax for file paths means: the scheduler will read the file list directly from STAR storage.
+  -->
+
+
+<job
+    fileListSyntax="xrootd"
+    maxFilesPerProcess="1"
+    simulateSubmission="false">
+
+  <!--
+    shell = the “environment wrapper” for every job.
+
+    Here: run inside the STAR SL7 Singularity container so every worker node
+    sees the same software (ROOT + STAR libraries).
+
+    -e : start with a clean environment (less random weirdness)
+    -B : bind/mount these filesystem roots into the container so your job can
+         actually see STAR storage (/gpfs, /star, /afs, etc.)
+  -->
+  <shell>singularity exec -e -B /direct -B /star -B /afs -B /gpfs -B /sdcc/lustre02 /cvmfs/star.sdcc.bnl.gov/containers/rhic_sl7.sif</shell>
+
+  <!--
+    INPUT: "filelist:" means: read a plain text file with one file path per line.
+    nFiles="all": use every line.
+  -->
+  <input URL="filelist:&jobFolder;/filelist.list" nFiles="all"/>
+
+  <!--
+    LOGS:
+      stdout = normal prints (printf/cout/ROOT chatter)
+      stderr = warnings/errors (stack traces, "Error in <...>", etc.)
+
+    $JOBID = unique job identifier (great for debugging).
+  -->
+  <stdout URL="file:&jobFolder;/log/$JOBID.out"/>
+  <stderr URL="file:&jobFolder;/log/$JOBID.err"/>
+
+
+  <command>
+    <!--
+      MAIN COMMAND (what each job actually does)
+
+      root4star is commonly used in STAR examples for running ROOT with STAR libraries.
+      Flags:
+        -l : start ROOT “lightly” (no splash)
+        -b : batch mode (no GUI)
+        -q : quit when macro is done
+
+        $FILEBASENAME is the base name of the input file (e.g., "st_physics_12345678_raw_0010001.picoDst.root" becomes "st_physics_12345678_raw_0010001")
+        $JOBID is safe, unique, and filename-friendly
+    -->
+    @ nFile=0
+    while ( $nFile &lt; $INPUTFILECOUNT )
+    eval set filename = '$INPUTFILE'$nFile
+
+    # put your script here, with filename as input file
+     root -l -b -q macros/runPicoDstAnalysisMaker.C\(\"$filename\",\"output_${FILEBASENAME}_${JOBID}.root\",-1\)
+
+    @ nFile++
+    end
+
+  </command>
+
+  <!--
+    OUTPUT STAGING (bringing results back)
+
+    fromScratch="*.root" means: grab any ROOT files produced on the worker node.
+    toURL tells where to copy them when the job finishes. Examples typically use file:/..
+  -->
+  <output fromScratch="*.root" toURL="file:&jobFolder;/production/"/>
+
+  <!--
+    <Generator> is used for generated .csh scripts that star-submit generates, unfortunately it allows only full path or local without variables
+  -->
+
+  <Generator>
+    <Location>./scheduler</Location>
+  </Generator>
+
+  <!--
+    SandBox = the job’s “backpack”.
+
+    Everything listed here gets zipped and shipped with the job.
+    Include only what you truly need, because a huge backpack slows submission.
+  -->
+  <SandBox installer="ZIP">
+    <Package name="LocalAnalysisCode">
+      <File>file:&baseFolder;/StRoot/</File>
+      <File>file:&baseFolder;/.sl73_gcc485/</File>
+      <File>file:&baseFolder;/macros/</File>
+    </Package>
+  </SandBox>
+
+
+</job>
