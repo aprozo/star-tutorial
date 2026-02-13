@@ -64,6 +64,13 @@ cons
 root -l -b -q 'macros/runPicoDstAnalysisMaker.C("st_physics_20069002_raw_1500008.picoDst.root","output_tree")'
 root -l -b -q macros/readMyTreeEvent.C++
 ```
+The second part is how to handle the batch scheduler [SUMS](https://www.star.bnl.gov/public/comp/Grid/scheduler/manual.htm) 
+
+For that, on SDCC [Alma9](https://star-juniors.github.io/software/a9.html) `starub` node one can run 
+```bash
+./submit.sh
+```
+for sending an example of 2 jobs to HTCondor system.
 
 ## Remark: Running on your own laptop
 In case you want to enter and run STAR container on your own laptop:
