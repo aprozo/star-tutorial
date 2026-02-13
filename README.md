@@ -61,7 +61,7 @@ Run from project root:
 ```bash
 star-shell #load into star container
 cons 
-root -l -b -q 'macros/runPicoDstAnalysisMaker.C("st_physics_20069002_raw_1500008.picoDst.root","output_tree")'
+root -l -b -q 'macros/runPicoDstAnalysisMaker.C("st_physics_20069002_raw_1500008.picoDst.root","output_tree.root")'
 root -l -b -q macros/readMyTreeEvent.C++
 ```
 The second part is how to handle the batch scheduler [SUMS](https://www.star.bnl.gov/public/comp/Grid/scheduler/manual.htm) 
