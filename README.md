@@ -61,7 +61,7 @@ Run from project root:
 ```bash
 star-shell #load into star container
 cons 
-root -l -b -q 'macros/runPicoDstAnalysisMaker.C("/workspaces/star-tutorial/st_physics_20069002_raw_1500008.picoDst.root","outputPicoAnaMaker.root",-1)'
+root -l -b -q 'macros/runPicoDstAnalysisMaker.C("st_physics_20069002_raw_1500008.picoDst.root","output_tree")'
 root -l -b -q macros/readMyTreeEvent.C++
 ```
 
